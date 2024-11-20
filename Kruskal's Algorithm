@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+typedef struct Edge {
+    int src, dest, weight;
+} Edge;
+
+typedef struct Graph {
+    int V, E;
+    Edge edges[MAX];
+} Graph;
+
+int findParent(int parent[], int i) {
+    if (parent[i] == i) {
+        return i;
+    }
+    return findParent(parent, parent[i]);
+}
+
+void unionSet(int parent[], int rank[], int x, int y) {
+    int rootX = findParent(parent, x);
+    int rootY = findParent(parent, y);
+
+    if (rank[rootX] < rank[rootY]) {
+        parent[rootX] = rootY;
+    } else if (rank[rootX] > rank[rootY]) {
+        parent[rootY] = rootX;
+    } else {
+        parent[rootY] = rootX;
+        rank[rootX]++;
+    }
+}
+
+int compareEdges(const void *a, const void *b) {
+    Edge *edgeA = (Edge *)a;
+    Edge *edgeB = (Edge *)b;
+    return edgeA->weight - edgeB->weight;
+}
+
+void kruskalMST(Graph *graph) {
+    int V = graph->V;
+    Edge result[MAX];
+    int e = 0, i = 0;
+
+    qsort(graph->edges, graph->E, sizeof(graph->edges[0]), compareEdges);
+
+    int parent[V], rank[V];
+    for (int v = 0; v < V; v++) {
+        parent[v] = v;
+        rank[v] = 0;
+    }
+
+    while (e < V - 1 && i < graph->E) {
+        Edge nextEdge = graph->edges[i++];
+
+        int x = findParent(parent, nextEdge.src);
+        int y = findParent(parent, nextEdge.dest);
+
+        if (x != y) {
+            result[e++] = nextEdge;
+            unionSet(parent, rank, x, y);
+        }
+    }
+
+    printf("Edges in the Minimum Spanning Tree:\n");
+    printf("Source - Destination : Weight\n");
+    for (i = 0; i < e; i++) {
+        printf("%d - %d : %d\n", result[i].src, result[i].dest, result[i].weight);
+    }
+}
+
+int main() {
+    Graph graph;
+    printf("Enter the number of vertices: ");
+    scanf("%d", &graph.V);
+    printf("Enter the number of edges: ");
+    scanf("%d", &graph.E);
+
+    for (int i = 0; i < graph.E; i++) {
+        printf("Enter edge %d (src dest weight): ", i + 1);
+        scanf("%d %d %d", &graph.edges[i].src, &graph.edges[i].dest, &graph.edges[i].weight);
+    }
+
+    kruskalMST(&graph);
+
+    return 0;
+}
