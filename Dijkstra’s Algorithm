@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <limits.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+int minDistance(int dist[], bool sptSet[], int n) {
+    int min = INT_MAX, min_index;
+    for (int v = 0; v < n; v++) {
+        if (!sptSet[v] && dist[v] <= min) {
+            min = dist[v];
+            min_index = v;
+        }
+    }
+    return min_index;
+}
+
+void dijkstra(int graph[MAX][MAX], int src, int n) {
+    int dist[MAX];
+    bool sptSet[MAX] = { false };
+
+    for (int i = 0; i < n; i++) {
+        dist[i] = INT_MAX;
+    }
+    dist[src] = 0;
+
+    for (int count = 0; count < n - 1; count++) {
+        int u = minDistance(dist, sptSet, n);
+        sptSet[u] = true;
+
+        for (int v = 0; v < n; v++) {
+            if (!sptSet[v] && graph[u][v] && dist[u] != INT_MAX &&
+                dist[u] + graph[u][v] < dist[v]) {
+                dist[v] = dist[u] + graph[u][v];
+            }
+        }
+    }
+
+    printf("Vertex\tDistance from Source\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\n", i, dist[i]);
+    }
+}
+
+int main() {
+    int n, graph[MAX][MAX], src;
+    printf("Enter the number of vertices: ");
+    scanf("%d", &n);
+
+    printf("Enter the adjacency matrix:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            scanf("%d", &graph[i][j]);
+        }
+    }
+
+    printf("Enter the source vertex: ");
+    scanf("%d", &src);
+
+    dijkstra(graph, src, n);
+
+    return 0;
+}
